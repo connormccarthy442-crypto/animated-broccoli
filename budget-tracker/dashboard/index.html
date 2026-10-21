@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f7f4">
+  <title>Morrow Budget</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+      <a class="brand" href="#overview" aria-label="Morrow Budget home">
+        <span class="brand-mark">m</span>
+        <span class="brand-name">morrow<span>money, in balance</span></span>
+      </a>
+
+      <div class="workspace-label">YOUR WORKSPACE</div>
+      <nav class="nav-list">
+        <button class="nav-item is-active" data-view="overview"><span class="nav-dot"></span>Overview</button>
+        <button class="nav-item" data-view="transactions"><span class="nav-dot"></span>Transactions</button>
+        <button class="nav-item" data-view="budgets"><span class="nav-dot"></span>Budgets</button>
+        <button class="nav-item" data-view="recurring"><span class="nav-dot"></span>Recurring</button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="privacy-mark" aria-hidden="true">LOCAL</div>
+        <p>Your numbers stay in this browser.</p>
+        <div class="data-actions">
+          <button class="text-button" id="export-data">Export backup</button>
+          <button class="text-button" id="import-data">Import backup</button>
+          <input id="import-file" type="file" accept="application/json,.json" hidden>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="breadcrumb"><span>Personal</span><span class="breadcrumb-slash">/</span><strong>Budget</strong></div>
+        <div class="topbar-actions">
+          <label class="month-control" for="month-picker">
+            <span class="sr-only">Choose month</span>
+            <button class="month-step" id="previous-month" aria-label="Previous month">‹</button>
+            <input id="month-picker" type="month">
+            <button class="month-step" id="next-month" aria-label="Next month">›</button>
+          </label>
+          <button class="button button-primary" data-open-transaction>＋ <span>Add transaction</span></button>
+        </div>
+      </header>
+
+      <div class="page-wrap">
+        <section class="page-heading" id="overview">
+          <div>
+            <p class="eyebrow" id="month-eyebrow">MONTHLY OVERVIEW</p>
+            <h1 id="page-title">Your money, in view.</h1>
+            <p class="heading-note">A clear picture of what came in, what went out, and what stays yours.</p>
+          </div>
+          <button class="button button-quiet" data-open-budget>Set monthly budget <span aria-hidden="true">↗</span></button>
+        </section>
+
+        <section class="summary-grid" aria-label="Monthly totals">
+          <article class="summary-card summary-card-primary">
+            <div class="card-label">MONTHLY BUDGET <span class="card-symbol">↗</span></div>
+            <div class="summary-value" id="monthly-budget-value">$0.00</div>
+            <div class="card-foot"><span id="budget-progress-copy">Set your monthly plan</span></div>
+            <div class="progress-track progress-track-light"><span id="budget-progress"></span></div>
+          </article>
+          <article class="summary-card">
+            <div class="card-label">SPENT THIS MONTH <span class="mini-mark coral"></span></div>
+            <div class="summary-value" id="spent-value">$0.00</div>
+            <div class="card-foot" id="spent-count">No expenses recorded</div>
+          </article>
+          <article class="summary-card">
+            <div class="card-label">BUDGET LEFT <span class="mini-mark green"></span></div>
+            <div class="summary-value" id="remaining-value">$0.00</div>
+            <div class="card-foot" id="remaining-copy">After expenses and contributions</div>
+          </article>
+          <article class="summary-card summary-card-goals">
+            <div class="card-label">SAVING + INVESTING <span class="mini-mark yellow"></span></div>
+            <div class="summary-value" id="goals-value">$0.00</div>
+            <div class="goal-split"><span id="savings-value">Savings $0.00</span><span id="investments-value">Invested $0.00</span></div>
+          </article>
+        </section>
+
+        <section class="alert-strip" id="alert-strip" aria-live="polite" hidden>
+          <span class="alert-icon" aria-hidden="true">!</span>
+          <div><strong>Category budget getting close</strong><span id="alert-copy"></span></div>
+          <button class="alert-link" data-view="budgets">Review budgets <span aria-hidden="true">→</span></button>
+        </section>
+
+        <div class="dashboard-grid">
+          <section class="panel category-panel" id="budgets">
+            <div class="panel-heading">
+              <div><p class="eyebrow">PLAN &amp; PACE</p><h2>Category budgets</h2></div>
+              <button class="icon-text-button" data-open-categories>Edit limits <span aria-hidden="true">↗</span></button>
+            </div>
+            <div class="category-list" id="category-list"></div>
+            <div class="panel-note"><span class="legend-dot"></span>Alerts appear at 75% of a category limit.</div>
+          </section>
+
+          <section class="panel recurring-panel" id="recurring">
+            <div class="panel-heading">
+              <div><p class="eyebrow">ON AUTOPILOT</p><h2>Recurring</h2></div>
+              <button class="icon-only" data-open-recurring aria-label="Add recurring transaction" title="Add recurring transaction">＋</button>
+            </div>
+            <div class="recurring-list" id="recurring-list"></div>
+            <button class="panel-bottom-link" data-open-recurring>Add recurring expense <span aria-hidden="true">→</span></button>
+            <p class="recurring-disclaimer">Added when you open the dashboard on or after its due day.</p>
+          </section>
+
+          <section class="panel transaction-panel" id="transactions">
+            <div class="panel-heading">
+              <div><p class="eyebrow">THE DETAILS</p><h2>Recent transactions</h2></div>
+              <button class="icon-text-button" data-open-transaction>＋ Add transaction</button>
+            </div>
+            <div class="transaction-table-wrap">
+              <table class="transaction-table">
+                <thead><tr><th>Transaction</th><th>Category</th><th>Date</th><th class="amount-heading">Amount</th><th class="action-cell"><span class="sr-only">Actions</span></th></tr></thead>
+                <tbody id="transaction-rows"></tbody>
+              </table>
+              <div class="empty-state" id="transaction-empty" hidden>
+                <span class="empty-state-mark">＋</span>
+                <strong>No transactions this month</strong>
+                <span>Add an expense or contribution to start your ledger.</span>
+                <button class="button button-secondary" data-open-transaction>Add first transaction</button>
+              </div>
+            </div>
+          </section>
+        </div>
+        <footer class="page-footer"><span>Built for your own numbers.</span><span>Private on this device · <button class="text-button" id="clear-data">Clear local data</button></span></footer>
+      </div>
+    </main>
+  </div>
+
+  <dialog class="modal" id="transaction-dialog">
+    <form class="modal-form" id="transaction-form">
+      <div class="modal-heading"><div><p class="eyebrow">LEDGER ENTRY</p><h2>Add transaction</h2></div><button class="modal-close" type="button" data-close-dialog aria-label="Close">×</button></div>
+      <label class="field-label" for="transaction-type">Type</label>
+      <select id="transaction-type" class="field-control"><option value="expense">Expense</option><option value="savings">Savings contribution</option><option value="investment">Investment contribution</option></select>
+      <label class="field-label" for="transaction-description">Description</label>
+      <input id="transaction-description" class="field-control" maxlength="80" placeholder="e.g. Weekly groceries" required>
+      <div id="transaction-category-wrap"><label class="field-label" for="transaction-category">Category</label><select id="transaction-category" class="field-control"></select></div>
+      <div class="form-row">
+        <div><label class="field-label" for="transaction-amount">Amount</label><div class="money-input"><span>$</span><input id="transaction-amount" type="number" min="0.01" step="0.01" placeholder="0.00" required></div></div>
+        <div><label class="field-label" for="transaction-date">Date</label><input id="transaction-date" class="field-control" type="date" required></div>
+      </div>
+      <div class="modal-actions"><button class="button button-quiet" type="button" data-close-dialog>Cancel</button><button class="button button-primary" type="submit">Save transaction</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="budget-dialog">
+    <form class="modal-form" id="budget-form">
+      <div class="modal-heading"><div><p class="eyebrow">MONTHLY PLAN</p><h2>Set your budget</h2></div><button class="modal-close" type="button" data-close-dialog aria-label="Close">×</button></div>
+      <p class="modal-description">Set the amount you want to allocate across expenses, savings, and investments this month.</p>
+      <label class="field-label" for="monthly-budget-input">Monthly budget</label>
+      <div class="money-input"><span>$</span><input id="monthly-budget-input" type="number" min="0" step="0.01" placeholder="0.00" required></div>
+      <div class="modal-actions"><button class="button button-quiet" type="button" data-close-dialog>Cancel</button><button class="button button-primary" type="submit">Save budget</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="modal modal-wide" id="categories-dialog">
+    <form class="modal-form" id="categories-form">
+      <div class="modal-heading"><div><p class="eyebrow">PLAN &amp; PACE</p><h2>Category limits</h2></div><button class="modal-close" type="button" data-close-dialog aria-label="Close">×</button></div>
+      <p class="modal-description">Set a monthly spending limit for each category. The dashboard warns you at 75%.</p>
+      <div class="category-budget-fields" id="category-budget-fields"></div>
+      <div class="new-category-fields"><label><span class="field-label">New category</span><input id="new-category-name" class="field-control" maxlength="40" placeholder="e.g. Travel"></label><label><span class="field-label">Monthly limit</span><div class="money-input"><span>$</span><input id="new-category-limit" type="number" min="0" step="0.01" placeholder="0.00"></div></label></div>
+      <div class="modal-actions"><button class="button button-quiet" type="button" data-close-dialog>Cancel</button><button class="button button-primary" type="submit">Save limits</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="recurring-dialog">
+    <form class="modal-form" id="recurring-form">
+      <div class="modal-heading"><div><p class="eyebrow">ON AUTOPILOT</p><h2>Add recurring expense</h2></div><button class="modal-close" type="button" data-close-dialog aria-label="Close">×</button></div>
+      <label class="field-label" for="recurring-description">Description</label><input id="recurring-description" class="field-control" maxlength="80" placeholder="e.g. Rent" required>
+      <label class="field-label" for="recurring-category">Category</label><select id="recurring-category" class="field-control"></select>
+      <div class="form-row">
+        <div><label class="field-label" for="recurring-amount">Amount</label><div class="money-input"><span>$</span><input id="recurring-amount" type="number" min="0.01" step="0.01" placeholder="0.00" required></div></div>
+        <div><label class="field-label" for="recurring-day">Due day each month</label><input id="recurring-day" class="field-control" type="number" min="1" max="31" value="1" required></div>
+      </div>
+      <p class="modal-description">It will be added once per month when you open the dashboard on or after its due day.</p>
+      <div class="modal-actions"><button class="button button-quiet" type="button" data-close-dialog>Cancel</button><button class="button button-primary" type="submit">Save recurring expense</button></div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
